@@ -1,4 +1,5 @@
 ftcg
 ====
 
-Game
+Board game.
+
