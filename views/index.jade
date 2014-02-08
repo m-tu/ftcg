@@ -1,5 +1,10 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  #main-container.clear
+    #right
+      canvas(id="canvas", width="800px", height="800px")
+    #left
+      #menu
+        #inventory
+        #dice

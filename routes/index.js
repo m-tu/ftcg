@@ -4,5 +4,13 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
+
+  scripts: [
+    'js/canvas.js'
+  ]
+
+  res.render('index', { title: 'Get fucked', scripts: scripts });
+
+
+
 };

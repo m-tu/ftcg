@@ -6,3 +6,25 @@ body {
 a {
   color: #00B7FF;
 }
+
+#right {
+    float: left;
+}
+
+#left {
+    margin-left: 40px;
+    float: left;
+    width: 200px;
+}
+
+#dice {
+    background: blue;
+    width: 300px;
+    height: 300px;
+}
+
+.clear {
+    clear: both;
+}
+
+

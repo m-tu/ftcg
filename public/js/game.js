@@ -68,7 +68,6 @@ function Cell(type, x, y) {
 			});
 		}
 	};
-
 }
 
 /**
