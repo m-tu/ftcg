@@ -24,7 +24,7 @@ var map = [
     }
 
 
-function drawBorders() {
+function drawMap(map) {
   ctx.beginPath();
   ctx.lineWidth = 5;
 
@@ -34,31 +34,59 @@ function drawBorders() {
   ctx.lineTo(0, h);
   ctx.lineTo(0, 0);
 
-
-    for(var j = 0; j < dim.y; j++) {
-      ctx.moveTo(0, j * shell.y);
-      ctx.lineTo(w, j * shell.y);
-    }
-    for(var i = 0; i < dim.x; i++) {
-      ctx.moveTo(i * shell.y, 0);
-      ctx.lineTo(i * shell.y, h);
-    }
-
   ctx.stroke();
   ctx.closePath();
-}
 
-function parseMap(m){
-  for(var i = 0; i < m[0].length; i++) {
-    for(var j = 0; j < m[i].length; j++) {
+
+  for(var i = 0; i < map[0].length; i++){
+    for(var j = 0; j < map[0].length; j++){
+      switch (map[i][j]) {
+        case 0:
+          break;
+        case 1:
+          node(i, j);
+          break;
+        case 2:
+          cat(i, j);
+          break;
+        case 3:
+          start(i, j);
+          break;
+      }
 
     }
   }
 }
 
+function node(x, y){
+  ctx.beginPath();
+  var m = shell.x / 2; //distance to mid
+  ctx.arc(y * shell.y + m, x * shell.x + m, 10, 0, 2 * Math.PI);
+  ctx.stroke();
+  ctx.closePath();
+}
+
+
+function start(x, y){
+  ctx.beginPath();
+  var m = shell.x / 2; //distance to mid
+  ctx.fillText("START", y * shell.y + m, x * shell.x + m);
+  ctx.stroke();
+  ctx.closePath();
+}
+
+function cat(x, y){
+  ctx.beginPath();
+  ctx.fillStyle = "red";
+  var m = shell.x / 2; //distance to mid
+  ctx.arc(y * shell.y + m, x * shell.x + m, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.closePath();
+}
+
 (function init(){
   console.log("Init");
-  drawBorders();
+  drawMap(map);
 })();
 
 
