@@ -6,7 +6,6 @@ var Board = require('./Board');
  */
 var Game = function() {
 	this.board = new Board();
-
 	this.players = [];
 };
 

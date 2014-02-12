@@ -3,7 +3,7 @@ var Node = require('./Node');
 var Board = function() {
 	this.nodes = {};
 	this.start = null;
-
+	this.config = Board.CONFIG;
 	this.loadConfig(Board.CONFIG);
 };
 

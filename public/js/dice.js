@@ -26,7 +26,6 @@ function diceBorders() {
 function rollDice(min, max) {
 
   var roll = Math.floor(Math.random() * (max - min + 1) + min);
-  console.log("Roll: " + roll);
   var speed = 50,
       count = 30,
       run = 0,
@@ -35,7 +34,7 @@ function rollDice(min, max) {
   var interval = setInterval(function(){
     if(run === count) {
       clearInterval(interval);
-      console.log("tmRoll:" + tmpRoll);
+
     }
     if(run === count -1) tmpRoll = roll;
     run++;
@@ -45,7 +44,6 @@ function rollDice(min, max) {
     ctx.stroke();
     tmpRoll = Math.floor(Math.random() * (max - min + 1) + min);
   }, speed)
-
 
 }
 

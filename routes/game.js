@@ -23,7 +23,6 @@ exports.index = function(req, res){
 		req.session.playerId = playerId;
 		players[playerId] = player;
 
-
 		game.addPlayer(player);
 	} else {
 		player = players[playerId];

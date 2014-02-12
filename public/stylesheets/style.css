@@ -17,8 +17,12 @@ a {
     width: 200px;
 }
 
-#dice {
+#menu {
     width: 300px;
+}
+
+#dice {
+    width: inherit;
     height: 200px;
 }
 
@@ -30,6 +34,12 @@ a {
     height: inherit;
     width: 100px;
     float: left;
+}
+
+#startGame {
+    margin-top: 20px;
+    width: inherit;
+    height: 200px;
 }
 
 

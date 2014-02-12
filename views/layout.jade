@@ -4,8 +4,12 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js")
+    script(src="/socket.io/lib/socket.io.js")
+
   body
     block content
+  //script(src='../js/socket.js')
+  script(src='/js/socket.js')
   script(src='/js/canvas.js')
   script(src='/js/dice.js')
 
