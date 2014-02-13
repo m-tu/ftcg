@@ -41,6 +41,7 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 
 var io = require('socket.io').listen(server);
 
+
 io.sockets.on('connection', function (socket) {
 	socket.emit('CONNECT', messages); //tells client what socket.messages we accept
 	socket.on(messages.START_GAME, function (data) {

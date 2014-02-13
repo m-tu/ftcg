@@ -3,23 +3,23 @@
  */
 
 
-var canvas = document.getElementById("diceCanvas"),
-    ctx = canvas.getContext("2d"),
-    w = canvas.width,
-    h = canvas.height;
+var diceCanvas = document.getElementById("diceCanvas"),
+    diceCtx = diceCanvas.getContext("2d"),
+    diceW = diceCanvas.width,
+    diceH = diceCanvas.height;
 
 function diceBorders() {
-  ctx.beginPath();
-  ctx.lineWidth = 2;
+  diceCtx.beginPath();
+  diceCtx.lineWidth = 2;
 
-  ctx.moveTo(0, 0);
-  ctx.lineTo(w, 0);
-  ctx.lineTo(w, h);
-  ctx.lineTo(0, h);
-  ctx.lineTo(0, 0);
+  diceCtx.moveTo(0, 0);
+  diceCtx.lineTo(diceW, 0);
+  diceCtx.lineTo(diceW, diceH);
+  diceCtx.lineTo(0, diceH);
+  diceCtx.lineTo(0, 0);
 
-  ctx.stroke();
-  ctx.closePath();
+  diceCtx.stroke();
+  diceCtx.closePath();
 }
 
 
@@ -38,10 +38,10 @@ function rollDice(min, max) {
     }
     if(run === count -1) tmpRoll = roll;
     run++;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = 'bold 90pt Calibri';
-    ctx.fillText(tmpRoll, w/2 -25, h/2+50);
-    ctx.stroke();
+    diceCtx.clearRect(0, 0, diceCanvas.width, diceCanvas.height);
+    diceCtx.font = 'bold 90pt Calibri';
+    diceCtx.fillText(tmpRoll, diceW/2 -25, diceH/2+50);
+    diceCtx.stroke();
     tmpRoll = Math.floor(Math.random() * (max - min + 1) + min);
   }, speed)
 

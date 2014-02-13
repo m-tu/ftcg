@@ -3,91 +3,89 @@
  */
 
 var canvas = document.getElementById("canvas"),
-    ctx = canvas.getContext("2d"),
+    mainCtx = canvas.getContext("2d"),
     w = canvas.width,
     h = canvas.height;
 
-var map = [
-  [2,1,1,1,2],
-  [0,1,0,0,1],
-  [2,1,1,0,1],
-  [1,0,1,1,1],
-  [1,1,3,0,1]
-    ],
-    dim = {
-      x: map[0].length,
-      y: map.length
-    },
-    shell = {
-      x: w / dim.x,
-      y: h / dim.y
-    }
+function drawBorders() {
+	mainCtx.beginPath();
+	mainCtx.lineWidth = 5;
 
+	mainCtx.moveTo(0, 0);
+	mainCtx.lineTo(w, 0);
+	mainCtx.lineTo(w, h);
+	mainCtx.lineTo(0, h);
+	mainCtx.lineTo(0, 0);
 
-function drawMap(map) {
-  ctx.beginPath();
-  ctx.lineWidth = 5;
-
-  ctx.moveTo(0, 0);
-  ctx.lineTo(w, 0);
-  ctx.lineTo(w, h);
-  ctx.lineTo(0, h);
-  ctx.lineTo(0, 0);
-
-  ctx.stroke();
-  ctx.closePath();
-
-
-  for(var i = 0; i < map[0].length; i++){
-    for(var j = 0; j < map[0].length; j++){
-      switch (map[i][j]) {
-        case 0:
-          break;
-        case 1:
-          node(i, j);
-          break;
-        case 2:
-          cat(i, j);
-          break;
-        case 3:
-          start(i, j);
-          break;
-      }
-
-    }
-  }
+	mainCtx.stroke();
+	mainCtx.closePath();
 }
 
-function node(x, y){
-  ctx.beginPath();
-  var m = shell.x / 2; //distance to mid
-  ctx.arc(y * shell.y + m, x * shell.x + m, 10, 0, 2 * Math.PI);
-  ctx.stroke();
-  ctx.closePath();
+function drawNode(x, y){
+  mainCtx.beginPath();
+  mainCtx.arc(x, y, 10, 0, 2 * Math.PI);
+  mainCtx.stroke();
+  mainCtx.closePath();
+}
+
+function drawStart(x, y){
+  mainCtx.beginPath();
+//  mainCtx.fillText("START", x, y);
+	mainCtx.fillStyle = "red";
+	mainCtx.arc(x, y, 10, 0, 2 * Math.PI);
+//  mainCtx.stroke();
+	mainCtx.fill();
+  mainCtx.closePath();
+}
+
+function drawCat(x, y){
+	var img = new Image();
+	img.src = "/images/cat_40x38.png";
+  mainCtx.beginPath();
+//	mainCtx.arc(x, y, 21, 0, 2 * Math.PI);
+	img.onload = function(){
+		mainCtx.drawImage(img, x, y);
+	};
+//	mainCtx.stroke();
+  mainCtx.closePath();
+}
+
+function drawPlayer(node, player) {
+	console.log("ndoe");
+	console.log(node);
+	console.log("player");
+	console.log(player);
 }
 
 
-function start(x, y){
-  ctx.beginPath();
-  var m = shell.x / 2; //distance to mid
-  ctx.fillText("START", y * shell.y + m, x * shell.x + m);
-  ctx.stroke();
-  ctx.closePath();
-}
+function drawMap(board) {
+	drawBorders();
+	//draw nodes
+	for(var node in board.nodes) {
+		var currentNode = nodes[node];
+		var x = currentNode.x,
+				y = currentNode.y;
+		switch (currentNode.type) {
+			case 1:
+				drawNode(x, y);
+				break;
+			case 2:
+				drawCat(x, y);
+				break;
+			case 3:
+				drawStart(x, y);
+				break;
+		}
+		if(node.players.length > 0) {
+			node.players.forEach(function(player){
+				drawPlayer(node, player);
+			});
+		}
+	}
+	//draw players
 
-function cat(x, y){
-  ctx.beginPath();
-  ctx.fillStyle = "red";
-  var m = shell.x / 2; //distance to mid
-  ctx.arc(y * shell.y + m, x * shell.x + m, 10, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.closePath();
-}
 
-(function init(){
-  console.log("Init");
-  drawMap(map);
-})();
+}
 
 
 

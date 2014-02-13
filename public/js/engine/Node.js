@@ -64,5 +64,3 @@ Node.prototype.removePlayer = function(player) {
 		this.players.splice(index, 1);
 	}
 };
-
-module.exports = Node;
