@@ -30,10 +30,8 @@ function drawNode(x, y){
 
 function drawStart(x, y){
   mainCtx.beginPath();
-//  mainCtx.fillText("START", x, y);
-	mainCtx.fillStyle = "red";
+	mainCtx.fillStyle = "gray";
 	mainCtx.arc(x, y, 10, 0, 2 * Math.PI);
-//  mainCtx.stroke();
 	mainCtx.fill();
   mainCtx.closePath();
 }
@@ -42,19 +40,31 @@ function drawCat(x, y){
 	var img = new Image();
 	img.src = "/images/cat_40x38.png";
   mainCtx.beginPath();
-//	mainCtx.arc(x, y, 21, 0, 2 * Math.PI);
 	img.onload = function(){
 		mainCtx.drawImage(img, x, y);
 	};
-//	mainCtx.stroke();
   mainCtx.closePath();
 }
 
-function drawPlayer(node, player) {
-	console.log("ndoe");
-	console.log(node);
-	console.log("player");
-	console.log(player);
+function drawPlayer(node) {
+	var x = node.x,
+			y = node.y,
+			playersOnNode = node.players.length,
+			sectorDegree = 2 * Math.PI / playersOnNode,
+			startAngle = 0;
+	node.players.forEach(function(player){
+		mainCtx.globalCompositeOperation = "destination-over";
+		mainCtx.beginPath();
+		mainCtx.fillStyle = player.color;
+
+		mainCtx.arc(x, y, 25, startAngle, startAngle + sectorDegree);
+		mainCtx.fill();
+
+		mainCtx.closePath();
+
+		startAngle += sectorDegree;
+	})
+	mainCtx.globalCompositeOperation = 'source-over'
 }
 
 
@@ -62,7 +72,7 @@ function drawMap(board) {
 	drawBorders();
 	//draw nodes
 	for(var node in board.nodes) {
-		var currentNode = nodes[node];
+		var currentNode = board.nodes[node];
 		var x = currentNode.x,
 				y = currentNode.y;
 		switch (currentNode.type) {
@@ -76,14 +86,12 @@ function drawMap(board) {
 				drawStart(x, y);
 				break;
 		}
-		if(node.players.length > 0) {
-			node.players.forEach(function(player){
-				drawPlayer(node, player);
+		if(currentNode.players.length > 0) {
+			currentNode.players.forEach(function(player){
+				drawPlayer(currentNode);
 			});
 		}
 	}
-	//draw players
-
 
 }
 
