@@ -42,8 +42,8 @@ function startGame(config){
 
 	game.addPlayer(player_1);
 	game.addPlayer(player_2);
-	game.addPlayer(player_3);
-	game.addPlayer(player_4);
+//	game.addPlayer(player_3);
+//	game.addPlayer(player_4);
 
 	drawMap(game.board);
 }

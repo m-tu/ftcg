@@ -67,10 +67,23 @@ function drawPlayer(node) {
 	mainCtx.globalCompositeOperation = 'source-over'
 }
 
+function drawLinesToNeighbours(board) {
+	mainCtx.lineWidth = 2;
+	for(var nodeId in board.nodes) {
+		var node = board.nodes[nodeId];
+		for(var neighbourId in node.neighbours) {
+			var neighbour = node.neighbours[neighbourId];
+			mainCtx.beginPath();
+			mainCtx.moveTo(node.x, node.y);
+			mainCtx.lineTo(neighbour.x, neighbour.y);
+			mainCtx.stroke();
+			mainCtx.closePath();
+		}
+	}
+}
 
 function drawMap(board) {
 	drawBorders();
-	//draw nodes
 	for(var node in board.nodes) {
 		var currentNode = board.nodes[node];
 		var x = currentNode.x,
@@ -92,7 +105,7 @@ function drawMap(board) {
 			});
 		}
 	}
-
+		drawLinesToNeighbours(board);
 }
 
 
