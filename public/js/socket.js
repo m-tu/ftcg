@@ -33,18 +33,18 @@ function startGame(config){
 	player_2.id = 2;
 	player_2.color = "pink";
 
-//	var player_3 = new Player();
-//	player_3.id = 3;
-//	player_3.color = "purple";
-//
-//	var player_4 = new Player();
-//	player_4.id = 4;
-//	player_4.color = "blue";
+	var player_3 = new Player();
+	player_3.id = 3;
+	player_3.color = "purple";
+
+	var player_4 = new Player();
+	player_4.id = 4;
+	player_4.color = "blue";
 
 	game.addPlayer(player_1);
 	game.addPlayer(player_2);
-//	game.addPlayer(player_3);
-//	game.addPlayer(player_4);
+	game.addPlayer(player_3);
+	game.addPlayer(player_4);
 
 	drawMap(game.board);
 }
