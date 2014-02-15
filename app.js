@@ -9,12 +9,16 @@ var express = require('express');
 	game = require('./routes/game'),
 	http = require('http'),
 	path = require('path'),
-	messages = require('./engine/SocketMessages.js');
 	Game = require('./engine/Game'),
 	Board = require('./engine/Board'),
 	Player = require('./engine/Player');
 
-var app = express();
+// CONSTANTS
+var SESSION_ID_KEY = 'ftcg.sid';
+
+var app = express(),
+	cookieParser = express.cookieParser('92180e162bba6c5173bf52076aab388c8588ba7d'),
+	sessionStore = new express.session.MemoryStore();
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -25,8 +29,11 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(express.cookieParser('92180e162bba6c5173bf52076aab388c8588ba7d'));
-app.use(express.session());
+app.use(cookieParser);
+app.use(express.session({
+	store: sessionStore,
+	key: SESSION_ID_KEY
+}));
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -41,22 +48,35 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 
 var io = require('socket.io').listen(server);
 
+io.set('log level', 2);
 
-io.sockets.on('connection', function (socket) {
-	socket.emit('CONNECT', messages); //tells client what socket.messages we accept
-	socket.on(messages.START_GAME, function (data) {
-		socket.emit(messages.MAP, startGame(data));
+// allow socket connection only with valid express session
+io.configure(function() {
+	io.set('authorization', function(data, callback) {
+		cookieParser(data, {}, function(err) {
+			if (err) {
+				callback(null, false);
+
+				return;
+			}
+
+			var sessionId = (data.secureCookies && data.secureCookies[SESSION_ID_KEY]) ||
+				(data.signedCookies && data.signedCookies[SESSION_ID_KEY]) ||
+				(data.cookies && data.cookies[SESSION_ID_KEY]);
+
+			sessionStore.get(sessionId, function(err, session) {
+				if (err || !session) {
+					callback(null, false);
+				} else {
+
+					data.sessionId = sessionId;
+					callback(null, true);
+				}
+			});
+		});
 	});
 });
 
 app.get('/', routes.index);
 app.get('/users', user.list);
-app.get('/game', game.index);
-
-//not quite sure what to do, just send config for now
-function startGame(info){
-	var game = new Game();
-	return game.board.config;
-}
-
-
+app.get('/game', game.index(io));
