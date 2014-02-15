@@ -22,7 +22,7 @@ function drawBorders() {
 }
 
 function drawNode(x, y){
-	mainCtx.fillStyle = "black";
+	mainCtx.fillStyle = Node.Colors.BLANK;
   mainCtx.beginPath();
   mainCtx.arc(x, y, 10, 0, 2 * Math.PI);
   mainCtx.fill();
@@ -31,7 +31,7 @@ function drawNode(x, y){
 
 function drawStart(x, y){
   mainCtx.beginPath();
-	mainCtx.fillStyle = "gray";
+	mainCtx.fillStyle = Node.Colors.START;
 	mainCtx.arc(x, y, 10, 0, 2 * Math.PI);
 	mainCtx.fill();
   mainCtx.closePath();
@@ -42,7 +42,7 @@ function drawCat(x, y){
 	img.src = "/images/cat_40x38.png";
   mainCtx.beginPath();
 	img.onload = function(){
-		mainCtx.drawImage(img, x, y);
+		mainCtx.drawImage(img, x-20, y-10);
 	};
   mainCtx.closePath();
 }
@@ -98,12 +98,12 @@ function drawMap(board) {
 				drawStart(x, y);
 				break;
 		}
+		mainCtx.strokeStyle = Node.Colors.BLANK;
 		if(currentNode.players.length > 0) {
 			currentNode.players.forEach(function(player){
 				drawPlayer(currentNode);
 			});
 		}
-		mainCtx.strokeStyle = "black";
 	}
 	drawLinesToNeighbours(board);
 }

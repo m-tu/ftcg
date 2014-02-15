@@ -26,6 +26,12 @@ Node.Types = {
 	START: 3
 };
 
+Node.Colors = {
+	BLANK: "black",
+	CAT_GIF: "red",
+	START: "gray"
+};
+
 /**
  * Add neighbour to node
  *
