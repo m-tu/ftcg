@@ -22,9 +22,10 @@ function drawBorders() {
 }
 
 function drawNode(x, y){
+	mainCtx.fillStyle = "black";
   mainCtx.beginPath();
   mainCtx.arc(x, y, 10, 0, 2 * Math.PI);
-  mainCtx.stroke();
+  mainCtx.fill();
   mainCtx.closePath();
 }
 
@@ -52,19 +53,16 @@ function drawPlayer(node) {
 			playersOnNode = node.players.length,
 			sectorDegree = 2 * Math.PI / playersOnNode,
 			startAngle = 0;
+
 	node.players.forEach(function(player){
-		mainCtx.globalCompositeOperation = "destination-over";
 		mainCtx.beginPath();
-		mainCtx.fillStyle = player.color;
-
-		mainCtx.arc(x, y, 25, startAngle, startAngle + sectorDegree);
-		mainCtx.fill();
-
+		mainCtx.lineWidth = 10;
+		mainCtx.strokeStyle = player.color;
+		mainCtx.arc(x, y, 15, startAngle, startAngle + sectorDegree);
+		mainCtx.stroke();
 		mainCtx.closePath();
-
 		startAngle += sectorDegree;
 	})
-	mainCtx.globalCompositeOperation = 'source-over'
 }
 
 function drawLinesToNeighbours(board) {
@@ -83,6 +81,7 @@ function drawLinesToNeighbours(board) {
 }
 
 function drawMap(board) {
+	mainCtx.clearRect(5,5, w, h);
 	drawBorders();
 	for(var node in board.nodes) {
 		var currentNode = board.nodes[node];
@@ -104,8 +103,9 @@ function drawMap(board) {
 				drawPlayer(currentNode);
 			});
 		}
+		mainCtx.strokeStyle = "black";
 	}
-		drawLinesToNeighbours(board);
+	drawLinesToNeighbours(board);
 }
 
 

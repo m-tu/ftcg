@@ -13,7 +13,7 @@ Board.CONFIG = [
 	{id: 2, x: 100, y: 400, type: 1, neighbours: [1, 3]},
 	{id: 3, x: 300, y: 200, type: 1, neighbours: [2, 4]},
 	{id: 4, x: 100, y: 100, type: 3, neighbours: [3]},
-	{id: 5, x: 500, y: 400, type: 2, neighbours: [4]}
+	{id: 5, x: 500, y: 400, type: 2, neighbours: [1]}
 ];
 
 /**
