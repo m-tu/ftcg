@@ -9,6 +9,24 @@ var Board = function() {
 };
 
 /**
+ * Generate random board config
+ * @param w {number} canvas width
+ * @param h {number} canvas height
+ * @param blanks {number} amount of blank nodes
+ * @param gifs {number} amount of gif nodes
+ * @returns Board.CONFIG
+ */
+Board.generateRandomConfig = function(w, h, blanks, gifs) {
+	var config = [],
+			total = blanks + gifs + 1;//start
+
+	return config;
+}
+
+
+
+
+/**
  * Default config
  * @type {Array} Array of node objects
  */
