@@ -4,6 +4,7 @@ var Board = function() {
 	this.nodes = {};
 	this.start = null;
 	this.config = Board.CONFIG;
+	this.config = this.generateConfig(20);
 	this.loadConfig(Board.CONFIG);
 };
 
@@ -37,6 +38,33 @@ Board.CONFIG = [
 ];
 
 /**
+ * Generate straight line config
+ *
+ * @param size
+ */
+Board.prototype.generateConfig = function(size) {
+	var conf = [],
+		i;
+
+	for (i = 0; i < size; i++) {
+		conf.push({
+			id: i,
+			x: 0,
+			y: 0,
+			type: i % 3 === 0 ? 2 : 1,
+			neighbours: [i - 1, i + 1]
+		});
+	}
+
+	conf[0].neighbours = [1];
+	conf[size - 1].neighbours = [size - 2];
+
+	conf[size >> 1].type = 3;
+
+	return conf;
+};
+
+/**
  * Load config
  *
  * @param conf {Array} Board config
@@ -66,6 +94,27 @@ Board.prototype.loadConfig = function(conf) {
 				node.addNeighbour(neighbour);
 			}
 		});
+	});
+};
+
+/**
+ * /**
+ * Check if toNode is reachable from fromNode in moves
+ *
+ * @param {Node} fromNode
+ * @param {Node} toNode
+ * @param {number} moves
+ * @return {boolean}
+ */
+Board.prototype.isReachable = function(fromNode, toNode, moves) {
+	var self = this;
+
+	if (moves === 1) {
+		return fromNode.neighbours.indexOf(toNode) !== -1;
+	}
+
+	return fromNode.neighbours.some(function(node) {
+		self.isReachable(node, toNode, moves - 1);
 	});
 };
 

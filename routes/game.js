@@ -9,26 +9,69 @@ var Game = require('../engine/Game'),
 var game = new Game();
 
 // temp hack
-var globalPlayerId = 0,
-	players = {};
+var players = {};
 
-exports.index = function(req, res){
-	var playerId = req.session.playerId,
-		player;
+var messages = require('../engine/SocketMessages.js');
 
-	if (typeof playerId === 'undefined') {
-		playerId = globalPlayerId++;
+exports.index = function(io) {
+	io.sockets.on('connection', function (socket) {
+		var sessionId = socket.handshake.sessionId,
+			player = players[sessionId] || null,
+			initData = {
+				messages: messages, // tell client what socket.messages we accept
+				map: game.board.config
+			};
 
-		player = new Player(playerId);
-		req.session.playerId = playerId;
-		players[playerId] = player;
+		if (player !== null) {
+			// already in game
+			initData.inGame = true;
+		}
 
-		game.addPlayer(player);
-	} else {
-		player = players[playerId];
-	}
+		socket.emit('connected', initData);
 
-	res.send(game.getInfo());
+		socket.on(messages.JOIN_GAME, function (data, callback) {
+			console.log('JOIN', data);
 
-	//res.render('game');
+			if (player !== null) {
+				callback({
+					success: false,
+					error: 'Already joined'
+				});
+
+				return;
+			}
+
+			player = game.addPlayer();
+
+			if (player === null) {
+				// failed
+				callback({
+					success: false,
+					error: 'Error'
+				});
+			} else {
+				players[sessionId] = player;
+				callback({
+					success: true,
+					data: {
+						players: game.getPlayersInfo()
+					}
+				});
+				socket.broadcast.emit('players', game.getPlayersInfo());
+
+			}
+
+			if (initData.inGame) {
+				socket.emit('players', game.getPlayersInfo());
+			}
+		});
+	});
+
+	return function(req, res){
+		res.render('game');
+	};
+
 };
+
+
+

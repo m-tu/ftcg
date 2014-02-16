@@ -2,6 +2,11 @@ doctype html
 html
     head
         title= title
-        script(src='/js/game.js')
     body
         h1 tere
+        #map
+        #buttons
+        #players
+    script(src="/socket.io/lib/socket.io.js")
+    script(src="/js/timmu/game.js")
+    script(src='/js/timmu/socket.js')

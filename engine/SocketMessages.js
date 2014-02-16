@@ -9,7 +9,8 @@
  */
 var SocketMessages = {
 	START_GAME: "START_GAME",
-	MAP: "MAP"
+	MAP: "MAP",
+	JOIN_GAME: 'JOIN_GAME'
 };
 
 module.exports = SocketMessages;
