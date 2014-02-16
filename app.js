@@ -3,7 +3,7 @@
  * Module dependencies.
  */
 
-var express = require('express');
+var express = require('express'),
 	routes = require('./routes'),
 	user = require('./routes/user'),
 	game = require('./routes/game'),
@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+	app.use(express.errorHandler());
 }
 
 var server = http.createServer(app).listen(app.get('port'), function(){

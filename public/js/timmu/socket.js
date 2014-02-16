@@ -10,8 +10,12 @@ socket.on('connected', function (data) {
 	if (!data.inGame) {
 		createJoin();
 	}
+});
 
-//	socket.emit(messages.JOIN_GAME);
+// temp hack - reload page after socket error
+socket.on('error', function() {
+	console.log('error');
+	location.reload();
 });
 
 function createJoin() {
@@ -20,16 +24,11 @@ function createJoin() {
 			if (data.success) {
 				console.log('Players', data.data.players);
 				updatePlayers(data.data.players);
-				createStart();
 			} else {
 				console.log(data.error);
 			}
 		});
 	});
-}
-
-function createStart() {
-
 }
 
 socket.on('message', function(data) {
@@ -38,4 +37,43 @@ socket.on('message', function(data) {
 
 socket.on('players', function(players) {
 	updatePlayers(players);
+});
+
+socket.on('showStart', function() {
+	createButton('Start', function() {
+		socket.emit('start');
+	});
+});
+
+socket.on('start', function(data) {
+	updatePlayers(data.players);
+	updateActivePlayer(data.active);
+
+	document.getElementById('buttons').innerHTML = '';
+});
+
+socket.on('turn', function() {
+	createButton('Roll dice', function() {
+		socket.emit('rollDice', function(data) {
+			console.log('i rolled ' + data.roll);
+
+			showMoves(data.nodes, function(node) {
+				socket.emit('move', node);
+			});
+		});
+	});
+});
+
+socket.on('roll', function(roll) {
+	updateRoll(roll);
+});
+
+socket.on('activePlayer', function(active) {
+	updateActivePlayer(active);
+});
+
+socket.on('reachableNodes', function(nodes) {
+	showMoves(nodes, function(node) {
+		socket.emit('move', node);
+	});
 });

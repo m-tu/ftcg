@@ -5,7 +5,7 @@ var Board = function() {
 	this.start = null;
 	this.config = Board.CONFIG;
 	this.config = this.generateConfig(20);
-	this.loadConfig(Board.CONFIG);
+	this.loadConfig(this.config);
 };
 
 /**
@@ -41,7 +41,7 @@ Board.prototype.generateConfig = function(size) {
 	conf[0].neighbours = [1];
 	conf[size - 1].neighbours = [size - 2];
 
-	conf[size >> 1].type = 3;
+	conf[size >> 1].type = Node.Types.START;
 
 	return conf;
 };
@@ -96,8 +96,18 @@ Board.prototype.isReachable = function(fromNode, toNode, moves) {
 	}
 
 	return fromNode.neighbours.some(function(node) {
-		self.isReachable(node, toNode, moves - 1);
+		return self.isReachable(node, toNode, moves - 1);
 	});
+};
+
+/**
+ * Get node by id
+ *
+ * @param {number} nodeId
+ * @return {Node|null}
+ */
+Board.prototype.getNode = function(nodeId) {
+	return this.nodes[nodeId] || null;
 };
 
 module.exports = Board;

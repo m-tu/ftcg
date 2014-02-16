@@ -25,6 +25,8 @@ exports.index = function(io) {
 		if (player !== null) {
 			// already in game
 			initData.inGame = true;
+
+			player.data.socket = socket;
 		}
 
 		socket.emit('connected', initData);
@@ -41,7 +43,7 @@ exports.index = function(io) {
 				return;
 			}
 
-			player = game.addPlayer();
+			player = game.addPlayer({socket: socket});
 
 			if (player === null) {
 				// failed
@@ -58,13 +60,90 @@ exports.index = function(io) {
 					}
 				});
 				socket.broadcast.emit('players', game.getPlayersInfo());
-
-			}
-
-			if (initData.inGame) {
-				socket.emit('players', game.getPlayersInfo());
+				socket.emit('showStart');
 			}
 		});
+
+		socket.on('start', function() {
+			var activePlayer;
+
+			if (game.start()) {
+				activePlayer = game.currentPlayer;
+
+				io.sockets.emit('start', {
+					players: game.getPlayersInfo(),
+					active: activePlayer.id
+				});
+
+				activePlayer.data.socket.emit('turn');
+			}
+		});
+
+		socket.on('rollDice', function(callback) {
+			var roll;
+
+			console.log('roll');
+
+			if (!game.isValidPlayer(player)) {
+				console.log('not valid player');
+				return;
+			}
+
+			roll = game.rollDice();
+
+			console.log('roll resut', roll);
+
+
+			if (roll !== null) {
+				io.sockets.emit('roll', roll);
+				callback({
+					roll: roll,
+					nodes: game.getReachableNodes()
+				});
+			}
+		});
+
+		socket.on('move', function(node) {
+			console.log('go');
+
+			if (!game.isValidPlayer(player)) {
+				console.log('not valid player');
+				return;
+			}
+
+			if (game.moveTo(node)) {
+				// successful move
+				io.sockets.emit('players', game.getPlayersInfo());
+				io.sockets.emit('roll', null);
+				io.sockets.emit('activePlayer', game.getActivePlayerId());
+
+				game.currentPlayer.data.socket.emit('turn');
+			} else {
+				console.log('not valid move');
+			}
+		});
+
+		if (initData.inGame) {
+			// sync all game data, oeh
+			socket.emit('players', game.getPlayersInfo());
+
+			if (!game.started) {
+				socket.emit('showStart');
+			} else {
+				// update info
+				socket.emit('roll', game.dice);
+				socket.emit('activePlayer', game.getActivePlayerId());
+
+				if (game.currentPlayer === player) {
+					if (game.dice === null) {
+						socket.emit('turn');
+					} else {
+						socket.emit('reachableNodes', game.getReachableNodes());
+					}
+				}
+
+			}
+		}
 	});
 
 	return function(req, res){

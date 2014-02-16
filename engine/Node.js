@@ -1,10 +1,9 @@
 /**
  * Single cell/node on game board
- * @param x {number}
- * @param y {number}
- * @param id {number}
- * @param type {Node.Types}
- * @param players {Player[]} Players on the node
+ * @param {number} id
+ * @param {number} x
+ * @param {number} y
+ * @param {Node.Types} type
  * @constructor
  */
 var Node = function(id, x, y, type) {
@@ -38,7 +37,7 @@ Node.prototype.addNeighbour = function(node) {
 /**
  * Move player to node
  *
- * @param player {Player}
+ * @param {Player} player
  */
 Node.prototype.addPlayer = function(player) {
 	var previousNode = player.getNode();
@@ -55,7 +54,7 @@ Node.prototype.addPlayer = function(player) {
 /**
  * Remove player from node
  *
- * @param player {Player}
+ * @param {Player} player
  */
 Node.prototype.removePlayer = function(player) {
 	var index = this.players.indexOf(player);
