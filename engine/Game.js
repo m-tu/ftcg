@@ -1,4 +1,5 @@
-var Board = require('./Board');
+var Board = require('./Board'),
+	Player = require('./Player');
 
 /**
  * Single game of ftcg
