@@ -4,7 +4,8 @@
 
 var socket = io.connect('http://localhost:3000'),
 		messages,
-		game;
+		game,
+		board;
 
 socket.on('CONNECT', function (data) {
 	messages = data;
@@ -18,13 +19,13 @@ function intOtherCallBacks() {
 }
 
 $("#startGame").click(function(){
-	console.log("Send start game");
 	socket.emit(messages.START_GAME, { players: ['Matu', 'Timmu'] });
 })
 
 function startGame(config){
 	console.log("Game started client side");
  	game = new Game();
+	board = game.board;
 	var player_1 = new Player();
 	player_1.id = 1;
 	player_1.color = "red";
@@ -46,17 +47,24 @@ function startGame(config){
 	game.addPlayer(player_3);
 	game.addPlayer(player_4);
 
-	drawMap(game.board);
+	draw();
 }
 
 $("#dice").click(function(){
 	rollDice(1, 6);
 	if(game !== 'undefined') {
 		console.log("move");
-		game.board.nodes[2].addPlayer(game.players[1]);
+//		mainCtx.clearRect(5,5, 300, 300)
+		game.board.nodes[8].addPlayer(game.players[1]);
 //		game.board.nodes[2].addPlayer(game.players[0])
 
-		drawMap(game.board);
+//		drawMap(game.board);
 	}
 })
 
+
+function draw(){
+	mainCtx.clearRect(5,5, w, h);
+	requestAnimFrame(draw);
+	drawMap(board);
+}

@@ -22,13 +22,13 @@ var Node = function(id, x, y, type) {
  */
 Node.Types = {
 	BLANK: 1,
-	CAT_GIF: 2,
+	GIF: 2,
 	START: 3
 };
 
 Node.Colors = {
 	BLANK: "black",
-	CAT_GIF: "red",
+	GIF: "red",
 	START: "gray"
 };
 

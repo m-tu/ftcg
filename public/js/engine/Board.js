@@ -11,9 +11,12 @@ var Board = function() {
 Board.CONFIG = [
 	{id: 1, x: 300, y: 600, type: 1, neighbours: [2]},
 	{id: 2, x: 100, y: 400, type: 1, neighbours: [1, 3]},
-	{id: 3, x: 300, y: 200, type: 1, neighbours: [2, 4]},
+	{id: 3, x: 300, y: 200, type: 1, neighbours: [2, 8]},
 	{id: 4, x: 100, y: 100, type: 3, neighbours: [3]},
-	{id: 5, x: 500, y: 400, type: 2, neighbours: [1]}
+	{id: 5, x: 200, y: 100, type: 2, neighbours: [0]},
+	{id: 6, x: 400, y: 100, type: 1, neighbours: [4]},
+	{id: 7, x: 600, y: 100, type: 1, neighbours: [6]},
+	{id: 8, x: 700, y: 400, type: 2, neighbours: [7]}
 ];
 
 /**

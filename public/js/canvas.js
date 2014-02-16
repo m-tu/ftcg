@@ -81,7 +81,6 @@ function drawLinesToNeighbours(board) {
 }
 
 function drawMap(board) {
-	mainCtx.clearRect(5,5, w, h);
 	drawBorders();
 	for(var node in board.nodes) {
 		var currentNode = board.nodes[node];
@@ -107,6 +106,15 @@ function drawMap(board) {
 	}
 	drawLinesToNeighbours(board);
 }
+
+window.requestAnimFrame = (function(){
+	return  window.requestAnimationFrame       ||
+			window.webkitRequestAnimationFrame ||
+			window.mozRequestAnimationFrame    ||
+			function( callback ){
+				window.setTimeout(callback, 1000 / 60);
+			};
+})();
 
 
 
