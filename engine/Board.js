@@ -1,4 +1,5 @@
-var Node = require('./Node');
+var Node = require('./Node'),
+	SpecialNode = require('./SpecialNode');
 
 var Board = function() {
 	this.nodes = {};
@@ -71,7 +72,13 @@ Board.prototype.loadConfig = function(conf) {
 
 	// create all nodes
 	conf.forEach(function(nodeConf) {
-		var node = new Node(nodeConf.id, nodeConf.x, nodeConf.y, nodeConf.type);
+		var node;
+
+		if (nodeConf.type === Node.Types.CAT_GIF) {
+			node = new SpecialNode(nodeConf);
+		} else {
+			node = new Node(nodeConf);
+		}
 
 		self.nodes[nodeConf.id] = node;
 
@@ -123,6 +130,35 @@ Board.prototype.isReachable = function(fromNode, toNode, moves) {
  */
 Board.prototype.getNode = function(nodeId) {
 	return this.nodes[nodeId] || null;
+};
+
+/**
+ * Generate new config
+ */
+Board.prototype.getConfig = function() {
+	var config = [],
+		label,
+		node,
+		id;
+
+	for (id in this.nodes) {
+		node = this.nodes[id];
+		label = node.type;
+
+		if (node instanceof SpecialNode && node.isOpened()) {
+			label = node.secret;
+		}
+
+		config.push({
+			id: node.id,
+			x: node.x,
+			y: node.y,
+			type: node.type,
+			label: label
+		});
+	}
+
+	return config;
 };
 
 module.exports = Board;

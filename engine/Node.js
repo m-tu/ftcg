@@ -1,16 +1,17 @@
 /**
  * Single cell/node on game board
- * @param {number} id
- * @param {number} x
- * @param {number} y
- * @param {Node.Types} type
+ * @param {object} config
+ * @param {number} config.id
+ * @param {number} config.x
+ * @param {number} config.y
+ * @param {Node.Types} config.type
  * @constructor
  */
-var Node = function(id, x, y, type) {
-	this.id = id;
-	this.x = x;
-	this.y = y;
-	this.type = type;
+var Node = function(config) {
+	this.id = config.id;
+	this.x = config.x;
+	this.y = config.y;
+	this.type = config.type;
 	this.neighbours = [];
 	this.players = [];
 };

@@ -1,5 +1,7 @@
 var Board = require('./Board'),
-	Player = require('./Player');
+	Player = require('./Player'),
+	SpecialNode = require('./SpecialNode'),
+	CONFIG = require('./CONFIG');
 
 /**
  * Single game of ftcg
@@ -14,6 +16,7 @@ var Game = function() {
 	 * @type {Player|null}
 	 */
 	this.currentPlayer = null;
+	this.hasPlayerMoved = false;
 	this.dice = null;
 };
 
@@ -55,7 +58,8 @@ Game.prototype.getPlayersInfo = function() {
 	return this.players.map(function(player) {
 		return {
 			id: player.id,
-			node: player.getNodeId()
+			node: player.getNodeId(),
+			money: player.money
 		};
 	});
 };
@@ -83,6 +87,8 @@ Game.prototype.start = function() {
 		this.started = true;
 
 		this.players.forEach(function(player) {
+			player.setMoney(CONFIG.INITIAL_MONEY);
+
 			self.board.start.addPlayer(player);
 		});
 
@@ -164,43 +170,87 @@ Game.prototype.populateReachableNodes = function(fromNode, moves, reachableNodes
  * Move current player to new node
  *
  * @param {number} nodeId Target node id
- * @return {boolean} True on success, false on failure
+ * @return {object|null} Result object on success, null on failure
  */
 Game.prototype.moveTo = function(nodeId) {
 	var player = this.currentPlayer,
 		currentNode = player.getNode(),
-		targetNode = this.board.getNode(nodeId);
+		targetNode = this.board.getNode(nodeId),
+		result = {};
 
 	if (this.dice === null) {
 		console.log('not valid dice');
-		return false;
+		return null;
+	}
+
+	if (this.hasPlayerMoved) {
+		console.log('player already moves');
+		return null;
 	}
 
 	if (!this.board.isReachable(currentNode, targetNode, this.dice)) {
 		console.log('node not reachable');
-		return false;
+		return null;
 	}
 
 	targetNode.addPlayer(player);
 
-	// TODO check for node special actions etc.
+	if (targetNode instanceof SpecialNode) {
+		result = {
+			price: CONFIG.OPEN_COST,
+			isOpened: targetNode.isOpened()
+		};
 
-	this.endTurn();
+		if (!result.isOpened) {
+			result.canOpen = player.canOpenNode();
+		}
+	}
 
-	return true;
+	this.hasPlayerMoved = true;
+
+	return result;
+};
+
+/**
+ * Open node currentPlayer is currently visiting
+ * @return {object|null} Node object on success, null of failure
+ */
+Game.prototype.openNode = function() {
+	var player = this.currentPlayer,
+		node = player.getNode();
+
+	if (player.canOpenNode()) {
+		player.openNode();
+
+		return {
+			id: node.id,
+			secret: node.secret
+		};
+	} else {
+		return null;
+	}
 };
 
 /**
  * End turn of current player
  */
 Game.prototype.endTurn = function() {
-	var playerIndex = this.players.indexOf(this.currentPlayer) + 1,
-		nextPlayer = playerIndex === this.players.length
-			? this.players[0] : this.players[playerIndex];
+	var playerIndex,
+		nextPlayer;
+
+	if (this.dice === null) {
+		return false;
+	}
+
+	playerIndex = this.players.indexOf(this.currentPlayer) + 1;
+	nextPlayer = playerIndex === this.players.length
+		? this.players[0] : this.players[playerIndex];
 
 	this.dice = null;
 	this.currentPlayer = nextPlayer;
+	this.hasPlayerMoved = false;
 
+	return true;
 };
 
 module.exports = Game;

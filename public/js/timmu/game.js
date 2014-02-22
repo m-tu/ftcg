@@ -4,7 +4,7 @@ function createMap(conf) {
 		row3 = '';
 
 	conf.forEach(function(node) {
-		row1 += '<td>' + node.type + '</td>';
+		row1 += '<td id="node-label' + node.id + '">' + node.label + '</td>';
 		row2 += '<td class="player-node" id="node' + node.id + '"></td>';
 		row3 += '<td id="button' + node.id + '"></td>';
 	});
@@ -25,6 +25,10 @@ function createButton(label, action) {
 	document.getElementById('buttons').appendChild(button);
 }
 
+function clearButtons() {
+	document.getElementById('buttons').innerHTML = '';
+}
+
 function updatePlayers(players) {
 	[].forEach.call(document.querySelectorAll('.player-node'), function(el) {
 		el.innerHTML = '';
@@ -33,7 +37,8 @@ function updatePlayers(players) {
 	document.getElementById('players').innerHTML = 'Players: ' +
 		players.map(function(player) {
 			if (player.node !== null) {
-				document.getElementById('node' + player.node).innerHTML += player.id + ' ';
+				document.getElementById('node' + player.node).innerHTML += player.id + ' ' +
+					'(' + player.money + ')';
 			}
 
 			return player.id;
@@ -76,4 +81,8 @@ function showMoves(ids, callback) {
 
 		document.getElementById('button' + id).appendChild(button);
 	});
+}
+
+function updateNode(id, label) {
+	document.getElementById('node-label' + id).innerHTML = label;
 }

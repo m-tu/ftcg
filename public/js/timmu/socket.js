@@ -18,19 +18,6 @@ socket.on('error', function() {
 	location.reload();
 });
 
-function createJoin() {
-	createButton('Join game', function() {
-		socket.emit(messages.JOIN_GAME, null, function(data) {
-			if (data.success) {
-				console.log('Players', data.data.players);
-				updatePlayers(data.data.players);
-			} else {
-				console.log(data.error);
-			}
-		});
-	});
-}
-
 socket.on('message', function(data) {
 	console.log('message', data);
 });
@@ -77,3 +64,43 @@ socket.on('reachableNodes', function(nodes) {
 		socket.emit('move', node);
 	});
 });
+
+socket.on('canOpen', function(data) {
+	createButton('Open ($' + data.price + ')', function() {
+		clearButtons();
+		socket.emit('open');
+	});
+	createEndTurn();
+});
+
+socket.on('openNode', function(node) {
+	updateNode(node.id, node.secret);
+});
+
+socket.on('endTurn', function() {
+	createEndTurn();
+});
+
+
+
+// functions
+
+function createJoin() {
+	createButton('Join game', function() {
+		socket.emit(messages.JOIN_GAME, null, function(data) {
+			if (data.success) {
+				console.log('Players', data.data.players);
+				updatePlayers(data.data.players);
+			} else {
+				console.log(data.error);
+			}
+		});
+	});
+}
+
+function createEndTurn() {
+	createButton('End turn', function() {
+		clearButtons();
+		socket.emit('endTurn');
+	});
+}

@@ -19,7 +19,7 @@ exports.index = function(io) {
 			player = players[sessionId] || null,
 			initData = {
 				messages: messages, // tell client what socket.messages we accept
-				map: game.board.config
+				map: game.board.getConfig()
 			};
 
 		if (player !== null) {
@@ -104,23 +104,59 @@ exports.index = function(io) {
 		});
 
 		socket.on('move', function(node) {
-			console.log('go');
+			var result;
 
 			if (!game.isValidPlayer(player)) {
 				console.log('not valid player');
 				return;
 			}
 
-			if (game.moveTo(node)) {
+			result = game.moveTo(node);
+
+			if (result !== null) {
 				// successful move
 				io.sockets.emit('players', game.getPlayersInfo());
-				io.sockets.emit('roll', null);
-				io.sockets.emit('activePlayer', game.getActivePlayerId());
 
-				game.currentPlayer.data.socket.emit('turn');
+				if (result.canOpen) {
+					socket.emit('canOpen', {price: result.price});
+				} else {
+					socket.emit('endTurn');
+				}
 			} else {
 				console.log('not valid move');
 			}
+		});
+
+		socket.on('open', function() {
+			var node;
+
+			if (!game.isValidPlayer(player)) {
+				return;
+			}
+
+			node = game.openNode();
+
+			if (node) {
+				io.sockets.emit('openNode', node);
+				io.sockets.emit('players', game.getPlayersInfo());
+				socket.emit('endTurn');
+			}
+		});
+
+		socket.on('endTurn', function() {
+			if (!game.isValidPlayer(player)) {
+				return;
+			}
+
+			if (!game.endTurn()) {
+				return;
+			}
+
+			io.sockets.emit('players', game.getPlayersInfo());
+			io.sockets.emit('roll', null);
+			io.sockets.emit('activePlayer', game.getActivePlayerId());
+
+			game.currentPlayer.data.socket.emit('turn');
 		});
 
 		if (initData.inGame) {
@@ -137,8 +173,12 @@ exports.index = function(io) {
 				if (game.currentPlayer === player) {
 					if (game.dice === null) {
 						socket.emit('turn');
-					} else {
+					} else if (!game.hasPlayerMoved) {
 						socket.emit('reachableNodes', game.getReachableNodes());
+					} else if (player.canOpenNode()) {
+						socket.emit('canOpen', {price: player.getNode().getCost()});
+					} else {
+						socket.emit('endTurn');
 					}
 				}
 
