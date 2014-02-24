@@ -80,3 +80,4 @@ io.configure(function() {
 app.get('/', routes.index);
 app.get('/users', user.list);
 app.get('/game', game.index(io));
+app.get('/map', routes.map);

@@ -2,10 +2,12 @@
  * Created by martenhennoch on 12/02/14.
  */
 
+
 var socket = io.connect('http://localhost:3000'),
 		messages,
 		game,
 		board;
+
 
 socket.on('CONNECT', function (data) {
 	messages = data;
@@ -19,10 +21,11 @@ function intOtherCallBacks() {
 }
 
 $("#startGame").click(function(){
-	socket.emit(messages.START_GAME, { players: ['Matu', 'Timmu'] });
-})
+	//socket.emit(messages.START_GAME, { players: ['Matu', 'Timmu'] });
+	startGame();
+});
 
-function startGame(config){
+function startGame(){
 	console.log("Game started client side");
  	game = new Game();
 	board = game.board;
@@ -60,7 +63,7 @@ $("#dice").click(function(){
 
 //		drawMap(game.board);
 	}
-})
+});
 
 
 function draw(){
