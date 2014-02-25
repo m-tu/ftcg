@@ -44,23 +44,108 @@ Node.id = 0;
 nodes.push(new Node(40, 40, 3));
 
 canvas.onmousedown = function(e) {
+    //return;
 	e.preventDefault();
 	click.down = true;
 	click.update = true;
 };
 
 canvas.onmouseup = function(e) {
+    //return;
 	e.preventDefault();
 	click.up = true;
 	click.update = true;
 };
 
 canvas.onmousemove = function(e) {
+    //return;
 	e.preventDefault();
+
 	mouse.update = true;
 	mouse.x = e.offsetX;
 	mouse.y = e.offsetY;
 };
+
+var touch = null;
+
+canvas.addEventListener('touchstart', function(e) {
+    console.log('touch start')
+    e.preventDefault(); // disable mouse stuff?
+
+    if (touch) {
+        // already has touch, support only single touch
+        return;
+    }
+
+    if (e.touches.length === 0) {
+        return;
+    }
+
+    touch = e.touches[0];
+
+    click.down = true;
+    click.update = true;
+
+    var coords = getCoordsFromTouch(touch);
+    mouse.update = true;
+    mouse.x = coords.x;
+    mouse.y = coords.y;
+}, false);
+
+canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    console.log('touch move', e)
+    var match = getMatchingTouch(e.touches);
+
+    if (!match) {
+        return;
+    }
+
+    touch = match;
+
+    var coords = getCoordsFromTouch(match);
+
+    mouse.update = true;
+    mouse.x = coords.x;
+    mouse.y = coords.y;
+
+}, false);
+
+canvas.addEventListener('touchend', touchEnd, false);
+canvas.addEventListener('touchleave', touchEnd, false);
+canvas.addEventListener('touchcancel', touchEnd, false);
+
+
+function touchEnd(e) {
+    console.log('touch end', e);
+    var match = getMatchingTouch(e.changedTouches);
+
+    if (match) {
+        click.up = true;
+        click.update = true;
+        touch = null;
+    }
+}
+
+function getMatchingTouch(touches) {
+    if (!touch || !touches) {
+        null;
+    }
+
+    for (var i = 0; i < touches.length; i++) {
+        if (touches[i].identifier === touch.identifier) {
+            return touches[i];
+        }
+    }
+    return null;
+}
+
+function getCoordsFromTouch(touch) {
+    return {
+        x: touch.pageX - touch.target.offsetLeft,
+        y: touch.pageY - touch.target.offsetTop
+    };
+}
 
 function drawMap() {
 	checkMove();
@@ -104,7 +189,9 @@ function checkMove() {
 		return;
 	}
 
-	current.hover = getNodeByCoords(mouse.x, mouse.y);
+    console.log('check move', current);
+
+    current.hover = getNodeByCoords(mouse.x, mouse.y);
 
 	if (current.moving) {
 		if (current.hover && current.hover !== current.moving) {
@@ -142,7 +229,10 @@ function checkClick() {
 		return;
 	}
 
-	if (click.up) {
+    console.log('check clcik', current)
+
+
+    if (click.up) {
 		if (current.moving) {
 			current.moving = null;
 		} else if (current.selected) {
@@ -196,7 +286,7 @@ function getNodeByCoords(x, y) {
 
 	for (i = 0; i < nodes.length; i++) {
 		node = nodes[i];
-		if (getDistance(x, y, node.x, node.y) <= Config.RADIUS) {
+		if (getDistance(x, y, node.x, node.y) <= Config.RADIUS*2) {
 			return node;
 		}
 	}
