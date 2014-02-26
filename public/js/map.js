@@ -1,6 +1,11 @@
 var canvas = document.getElementById('map'),
 	ctx = canvas.getContext('2d'),
 	nodes = [],
+    deleting = {
+        mode: false,
+        node: null,
+        line: null
+    }
 	current = {
 		hover: null,
 		selected: null,
@@ -22,13 +27,14 @@ var canvas = document.getElementById('map'),
 		Colors: {
 			DEFAULT: 'green',
 			SELECTED: 'orange',
-			ACTIVE: 'red',
+			DELETE: 'red',
 			LINE: 'blue'
-		}
+		},
+        NODE: [{"id":0,"x":40,"y":40,"type":3,"neighbours":[]}]
 	};
 
-function Node(x, y, type) {
-	this.id = Node.id++;
+function Node(x, y, type, id) {
+	this.id = id || Node.id++;
 	this.x = x;
 	this.y = y;
 	this.type = type || 1;
@@ -41,24 +47,19 @@ function Node(x, y, type) {
 
 Node.id = 0;
 
-nodes.push(new Node(40, 40, 3));
-
 canvas.onmousedown = function(e) {
-    //return;
 	e.preventDefault();
 	click.down = true;
 	click.update = true;
 };
 
 canvas.onmouseup = function(e) {
-    //return;
 	e.preventDefault();
 	click.up = true;
 	click.update = true;
 };
 
 canvas.onmousemove = function(e) {
-    //return;
 	e.preventDefault();
 
 	mouse.update = true;
@@ -69,7 +70,6 @@ canvas.onmousemove = function(e) {
 var touch = null;
 
 canvas.addEventListener('touchstart', function(e) {
-    console.log('touch start')
     e.preventDefault(); // disable mouse stuff?
 
     if (touch) {
@@ -94,7 +94,6 @@ canvas.addEventListener('touchstart', function(e) {
 
 canvas.addEventListener('touchmove', function(e) {
     e.preventDefault();
-    console.log('touch move', e)
     var match = getMatchingTouch(e.touches);
 
     if (!match) {
@@ -117,7 +116,6 @@ canvas.addEventListener('touchcancel', touchEnd, false);
 
 
 function touchEnd(e) {
-    console.log('touch end', e);
     var match = getMatchingTouch(e.changedTouches);
 
     if (match) {
@@ -159,17 +157,27 @@ function drawMap() {
 }
 
 function drawNode(node) {
+    var color;
+
 	node.neighbours.forEach(function(neighbour) {
 		drawPath(node, neighbour);
 	});
 
 	ctx.beginPath();
 	ctx.arc(node.x, node.y, Config.RADIUS, 0, 2 * Math.PI, false);
-	ctx.fillStyle = node === current.active ? Config.Colors.SELECTED : Config.Colors.DEFAULT;
+
+    if (deleting.mode && deleting.node === node) {
+        color = Config.Colors.DELETE;
+    } else {
+        color = node === current.active ? Config.Colors.SELECTED : Config.Colors.DEFAULT;
+    }
+	ctx.fillStyle = color;
 	ctx.fill();
 }
 
 function drawPath(nodeA, nodeB) {
+    var color = Config.Colors.LINE;
+
 	ctx.globalCompositeOperation = 'destination-over';
 
 	ctx.beginPath();
@@ -178,7 +186,19 @@ function drawPath(nodeA, nodeB) {
 	ctx.lineTo(nodeB.x, nodeB.y);
 
 	ctx.lineWidth = 2;
-	ctx.strokeStyle = Config.Colors.LINE;
+
+    if (deleting.mode) {
+        if (
+            (deleting.node === nodeA || deleting.node === nodeB) ||
+            deleting.line && (
+            (deleting.line[0] === nodeA && deleting.line[1] === nodeB) ||
+            (deleting.line[1] === nodeA && deleting.line[0] === nodeB))
+        ) {
+            color = Config.Colors.DELETE;
+        }
+    }
+
+	ctx.strokeStyle = color;
 	ctx.stroke();
 
 	ctx.globalCompositeOperation = 'source-over';
@@ -189,7 +209,27 @@ function checkMove() {
 		return;
 	}
 
-    console.log('check move', current);
+    if (deleting.mode) {
+        var node = getNodeByCoords(mouse.x, mouse.y);
+
+        if (node) {
+            deleting.node = node;
+            deleting.line = null;
+        } else {
+            var line = getLineByCoords(mouse.x, mouse.y);
+
+            if (line) {
+                deleting.line = line;
+                deleting.node = null;
+            } else {
+                deleting.line = null;
+                deleting.node = null;
+            }
+        }
+
+        mouse.update = false;
+        return;
+    }
 
     current.hover = getNodeByCoords(mouse.x, mouse.y);
 
@@ -229,8 +269,21 @@ function checkClick() {
 		return;
 	}
 
-    console.log('check clcik', current)
+    if (deleting.mode) {
+        if (deleting.node) {
+            deleteNode(deleting.node);
+            deleting.node = null;
+            deleting.line = null;
+        } else if (deleting.line) {
+            deleteLine(deleting.line);
+            deleting.line = null;
+        }
 
+        click.down = click.up = false;
+        click.update = false;
+
+        return;
+    }
 
     if (click.up) {
 		if (current.moving) {
@@ -294,6 +347,44 @@ function getNodeByCoords(x, y) {
 	return null;
 }
 
+function getLineByCoords(x, y) {
+    var node,
+        neighbour,
+        i, j;
+
+    for (i = 0; i < nodes.length; i++) {
+        node = nodes[i];
+
+        for (j = 0; j < node.neighbours.length; j++) {
+            neighbour = node.neighbours[j];
+
+            if (getDistanceToLine(x, y, node.x, node.y, neighbour.x, neighbour.y) < 5) {
+                return [node, neighbour];
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Distance to line from point
+ * @param {number} x0 X coord of point
+ * @param {number} y0 Y coord of point
+ * @param {number} x1 X coord of start point of line
+ * @param {number} y1 Y coord of start point of line
+ * @param {number} x2 X coord of end point of line
+ * @param {number} y2 Y coord of end point of line
+ * @returns {number} Distance
+ */
+function getDistanceToLine(x0, y0, x1, y1, x2, y2) {
+    var Dx = x1 - x2,
+        Dy = y1 - y2;
+
+    return Math.abs(Dy*x0 - Dx*y0 + x1*y2 - x2*y1) /
+        Math.sqrt(Math.pow(Dx, 2) + Math.pow(Dy, 2));
+}
+
 function getDistance(x1, y1, x2, y2) {
 	return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
@@ -316,6 +407,131 @@ function updateConfig() {
 	document.getElementById('conf').value = JSON.stringify(generateConfig());
 }
 
+function loadConfig(conf) {
+    var maxId = 0,
+        nodesById = {};
+
+    Node.id = 0;
+
+    nodes = conf.map(function(nodeConf) {
+        maxId = Math.max(maxId, nodeConf.id);
+
+        nodesById[nodeConf.id] = new Node(nodeConf.x, nodeConf.y, nodeConf.type, nodeConf.id);
+
+        return nodesById[nodeConf.id];
+    });
+
+    conf.forEach(function(nodeConf) {
+        nodesById[nodeConf.id].neighbours = nodeConf.neighbours.map(function(nodeId) {
+            return nodesById[nodeId];
+        });
+    });
+
+    updateConfig();
+
+    Node.id = maxId + 1;
+}
+
+function init() {
+    var config = window.localStorage.map && JSON.parse(window.localStorage.map) || Config.NODE;
+
+    loadConfig(config);
+}
+
+document.getElementById('save').addEventListener('click', function() {
+    window.localStorage.map = document.getElementById('conf').value;
+}, false);
+
+
+document.getElementById('reset').addEventListener('click', function() {
+    delete window.localStorage.map;
+
+    current = {
+        hover: null,
+        selected: null,
+        active: null
+    };
+
+    click = {
+        update: false,
+        down: false,
+        up: false,
+        downTimeout: null
+    };
+
+    mouse = {
+        update: false,
+        x: 0,
+        y: 0
+    };
+
+    init();
+}, false);
+
+document.getElementById('delete').addEventListener('click', function(e) {
+    deleting.mode = e.target.checked;
+
+    if (deleting.mode) {
+        current = {
+            hover: null,
+            selected: null,
+            active: null
+        };
+
+        click = {
+            update: false,
+            down: false,
+            up: false,
+            downTimeout: null
+        };
+
+        mouse = {
+            update: false,
+            x: 0,
+            y: 0
+        };
+    } else {
+        deleting.line = null;
+        deleting.node = null;
+    }
+    console.log(e.target.checked)
+}, false);
+
+function deleteNode(node) {
+    // delete from neighbours
+    node.neighbours.forEach(function(neighbour) {
+        var index = neighbour.neighbours.indexOf(node);
+
+        if (index !== -1) {
+            neighbour.neighbours.splice(index, 1);
+        }
+    });
+
+    // delete node
+    var index = nodes.indexOf(node);
+
+    if (index !== -1) {
+        nodes.splice(index, 1);
+    }
+}
+
+function deleteLine(line) {
+    var index = line[0].neighbours.indexOf(line[1]);
+
+    if (index !== -1) {
+        line[0].neighbours.splice(index, 1);
+    }
+
+    index = line[1].neighbours.indexOf(line[0]);
+
+    if (index !== -1) {
+        line[1].neighbours.splice(index, 1);
+    }
+}
+
+init();
+
 updateConfig();
 
 drawMap();
+
